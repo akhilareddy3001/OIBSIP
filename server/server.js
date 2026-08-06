@@ -2,12 +2,16 @@ const express = require("express");
 const cors = require("cors"); 
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
+const orderRoutes = require("./routes/orderRoutes");
+const pizzaRoutes = require("./routes/pizzaRoutes");
 dotenv.config();
 
 connectDB();
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use("/api/orders", orderRoutes);
+app.use("/api/pizzas", pizzaRoutes);
 app.get("/",(req,res)=>{
     res.send("Pizza Delivery Backend is running...");
 });

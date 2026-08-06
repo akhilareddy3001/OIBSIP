@@ -1,0 +1,58 @@
+const pizzas = [
+  {
+    id: 1,
+    name: "Margherita",
+    category: "Veg",
+    price: 299,
+    rating: 4.8,
+    image: "https://images.unsplash.com/photo-1604382355076-af4b0eb60143?w=600",
+    description: "Classic pizza topped with fresh mozzarella, tomato sauce and basil.",
+  },
+  {
+    id: 2,
+    name: "Farmhouse",
+    category: "Veg",
+    price: 399,
+    rating: 4.9,
+    image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600",
+    description: "Loaded with mushrooms, onions, capsicum and fresh tomatoes.",
+  },
+  {
+    id: 3,
+    name: "Pepperoni",
+    category: "Non-Veg",
+    price: 499,
+    rating: 4.7,
+    image: "https://images.unsplash.com/photo-1594007654729-407eedc4be65?w=600",
+    description: "Delicious pepperoni slices with extra mozzarella cheese.",
+  },
+  {
+    id: 4,
+    name: "Cheese Burst",
+    category: "Cheese Burst",
+    price: 549,
+    rating: 4.9,
+    image: "https://images.unsplash.com/photo-1541745537411-b8046dc6d66c?w=600",
+    description: "Rich cheese burst crust filled with creamy melted cheese.",
+  },
+  {
+    id: 5,
+    name: "Veg Supreme",
+    category: "Veg",
+    price: 449,
+    rating: 4.8,
+    image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600",
+    description: "Fresh vegetables, olives, sweet corn and premium cheese.",
+    description: "Juicy grilled chicken with mozzarella cheese and herbs.",
+  },
+  {
+    id: 6,
+    name: "Chicken Deluxe",
+    category: "Non-Veg",
+    price: 599,
+    rating: 4.9,
+    image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600",
+  },
+];
+
+export default pizzas;

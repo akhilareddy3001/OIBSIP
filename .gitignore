@@ -4,6 +4,14 @@ server/node_modules/
 
 # Environment variables
 server/.env
+client/.env
+.env
+.env.*
+
+# Firebase credentials - NEVER upload
+*serviceAccount*.json
+*service-account*.json
+server/config/*firebase*.json
 
 # Logs
 *.log
