@@ -14,6 +14,10 @@ function Checkout() {
 
     const navigate = useNavigate();
 
+    // ==========================================
+    // ADDRESS
+    // ==========================================
+
     const [address, setAddress] = useState({
         fullName: "",
         phone: "",
@@ -23,20 +27,30 @@ function Checkout() {
         pincode: "",
     });
 
-    const [paymentMethod, setPaymentMethod] = useState("");
-    const [upiId, setUpiId] = useState("");
+    // ==========================================
+    // PAYMENT
+    // ==========================================
 
-    const [cardDetails, setCardDetails] = useState({
-        cardNumber: "",
-        expiry: "",
-        cvv: "",
-    });
+    const [paymentMethod, setPaymentMethod] =
+        useState("");
 
-    const [placingOrder, setPlacingOrder] = useState(false);
+    const [upiId, setUpiId] =
+        useState("");
 
-    // --------------------------------
+    const [cardDetails, setCardDetails] =
+        useState({
+            cardNumber: "",
+            expiry: "",
+            cvv: "",
+        });
+
+    const [placingOrder, setPlacingOrder] =
+        useState(false);
+
+
+    // ==========================================
     // ADDRESS CHANGE
-    // --------------------------------
+    // ==========================================
 
     const handleAddressChange = (e) => {
         setAddress({
@@ -45,13 +59,19 @@ function Checkout() {
         });
     };
 
-    // --------------------------------
+
+    // ==========================================
     // PRICE CALCULATION
-    // --------------------------------
+    // ==========================================
 
     const subtotal = cart.reduce(
-        (total, item) =>
-            total + item.price * item.quantity,
+        (total, item) => {
+
+            const price =
+                Number(item.price) || 0;
+
+            return total + price;
+        },
         0
     );
 
@@ -64,15 +84,22 @@ function Checkout() {
     const total =
         subtotal + deliveryFee + gst;
 
-    // --------------------------------
+
+    // ==========================================
     // PLACE ORDER
-    // --------------------------------
+    // ==========================================
 
     const handlePlaceOrder = async () => {
 
-        // Check login
+        // --------------------------------------
+        // LOGIN CHECK
+        // --------------------------------------
+
         if (!user) {
-            alert("Please login to place your order.");
+
+            alert(
+                "Please login to place your order."
+            );
 
             navigate("/login", {
                 state: {
@@ -83,84 +110,220 @@ function Checkout() {
             return;
         }
 
-        // Check cart
+
+        // --------------------------------------
+        // CART CHECK
+        // --------------------------------------
+
         if (cart.length === 0) {
-            alert("Your cart is empty.");
+
+            alert(
+                "Your cart is empty."
+            );
+
             return;
         }
 
-        // Check address
+
+        // --------------------------------------
+        // ADDRESS CHECK
+        // --------------------------------------
+
         if (
-            !address.fullName ||
-            !address.phone ||
-            !address.house ||
-            !address.street ||
-            !address.city ||
-            !address.pincode
+            !address.fullName.trim() ||
+            !address.phone.trim() ||
+            !address.house.trim() ||
+            !address.street.trim() ||
+            !address.city.trim() ||
+            !address.pincode.trim()
         ) {
+
             alert(
                 "Please fill all delivery address fields."
             );
+
             return;
         }
 
-        // Check payment
+
+        // --------------------------------------
+        // PAYMENT CHECK
+        // --------------------------------------
+
         if (!paymentMethod) {
+
             alert(
                 "Please select a payment method."
             );
+
             return;
         }
 
-        // Check UPI
+
+        // --------------------------------------
+        // UPI CHECK
+        // --------------------------------------
+
         if (
             paymentMethod === "upi" &&
             !upiId.trim()
         ) {
-            alert("Please enter your UPI ID.");
+
+            alert(
+                "Please enter your UPI ID."
+            );
+
             return;
         }
 
-        // Check card
+
+        // --------------------------------------
+        // CARD CHECK
+        // --------------------------------------
+
         if (
             paymentMethod === "card" &&
             (
-                !cardDetails.cardNumber ||
-                !cardDetails.expiry ||
-                !cardDetails.cvv
+                !cardDetails.cardNumber.trim() ||
+                !cardDetails.expiry.trim() ||
+                !cardDetails.cvv.trim()
             )
         ) {
-            alert("Please fill all card details.");
+
+            alert(
+                "Please fill all card details."
+            );
+
             return;
         }
 
+
         try {
+
             setPlacingOrder(true);
 
-            // --------------------------------
-            // GET FIREBASE TOKEN
-            // --------------------------------
 
-            const token = await user.getIdToken();
+            // ==================================
+            // FIREBASE TOKEN
+            // ==================================
 
-            // --------------------------------
+            const token =
+                await user.getIdToken(true);
+
+
+            // ==================================
+            // CLEAN CART ITEMS
+            // ==================================
+
+            const orderItems = cart.map(
+                (item) => ({
+                    name:
+                        item.name ||
+                        "Pizza",
+
+                    image:
+                        item.image ||
+                        "",
+
+                    price:
+                        Number(item.price) ||
+                        0,
+
+                    unitPrice:
+                        Number(
+                            item.unitPrice
+                        ) ||
+                        Number(
+                            item.price
+                        ) ||
+                        0,
+
+                    quantity:
+                        Number(
+                            item.quantity
+                        ) ||
+                        1,
+
+                    size:
+                        item.size ||
+                        "Medium",
+
+                    crust:
+                        item.crust ||
+                        "Classic",
+
+                    sauce:
+                        item.sauce ||
+                        "",
+
+                    cheese:
+                        item.cheese ||
+                        "",
+
+                    toppings:
+                        Array.isArray(
+                            item.toppings
+                        )
+                            ? item.toppings
+                            : [],
+
+                    isCustom:
+                        Boolean(
+                            item.isCustom
+                        ),
+                })
+            );
+
+
+            // ==================================
             // CREATE ORDER
-            // --------------------------------
+            // ==================================
 
             const newOrder = {
-                userEmail: user.email,
-                items: cart,
-                address,
+
+                items: orderItems,
+
+                address: {
+                    fullName:
+                        address.fullName.trim(),
+
+                    phone:
+                        address.phone.trim(),
+
+                    house:
+                        address.house.trim(),
+
+                    street:
+                        address.street.trim(),
+
+                    city:
+                        address.city.trim(),
+
+                    pincode:
+                        address.pincode.trim(),
+                },
+
                 paymentMethod,
+
                 subtotal,
+
                 deliveryFee,
+
                 gst,
+
                 total,
             };
 
-            // --------------------------------
-            // SEND ORDER TO BACKEND
-            // --------------------------------
+
+            console.log(
+                "Sending order:",
+                newOrder
+            );
+
+
+            // ==================================
+            // SEND TO BACKEND
+            // ==================================
 
             const response = await fetch(
                 "http://localhost:5000/api/orders",
@@ -168,46 +331,86 @@ function Checkout() {
                     method: "POST",
 
                     headers: {
-                        "Content-Type": "application/json",
+                        "Content-Type":
+                            "application/json",
 
-                        // Firebase token
-                        Authorization: `Bearer ${token}`,
+                        Authorization:
+                            `Bearer ${token}`,
                     },
 
-                    body: JSON.stringify(newOrder),
+                    body:
+                        JSON.stringify(
+                            newOrder
+                        ),
                 }
             );
 
-            const data = await response.json();
+
+            // ==================================
+            // READ RESPONSE SAFELY
+            // ==================================
+
+            let data;
+
+            try {
+
+                data =
+                    await response.json();
+
+            } catch {
+
+                throw new Error(
+                    "Server returned an invalid response."
+                );
+            }
+
+
+            // ==================================
+            // BACKEND ERROR
+            // ==================================
 
             if (!response.ok) {
+
+                console.error(
+                    "Backend order error:",
+                    data
+                );
+
                 throw new Error(
+                    data.error ||
                     data.message ||
                     "Failed to place order."
                 );
             }
+
+
+            // ==================================
+            // SUCCESS
+            // ==================================
 
             console.log(
                 "Order Saved:",
                 data.order
             );
 
-            // Update frontend orders
+
             setOrders([
                 data.order,
                 ...orders,
             ]);
 
-            // Clear cart
+
             setCart([]);
 
-            // Success page
-            navigate("/order-success");
+
+            navigate(
+                "/order-success"
+            );
 
         } catch (error) {
 
             console.error(
-                "Place Order Error:",
+                "PLACE ORDER ERROR:",
                 error
             );
 
@@ -223,6 +426,7 @@ function Checkout() {
         }
     };
 
+
     return (
         <>
             <Navbar />
@@ -235,11 +439,16 @@ function Checkout() {
                         Checkout
                     </h1>
 
+
                     <div className="grid lg:grid-cols-3 gap-8">
 
+
+                        {/* ========================= */}
                         {/* LEFT SIDE */}
+                        {/* ========================= */}
 
                         <div className="lg:col-span-2">
+
 
                             {/* DELIVERY ADDRESS */}
 
@@ -249,58 +458,88 @@ function Checkout() {
                                     Delivery Address
                                 </h2>
 
+
                                 <div className="grid md:grid-cols-2 gap-5">
 
                                     <input
                                         type="text"
                                         name="fullName"
-                                        value={address.fullName}
-                                        onChange={handleAddressChange}
+                                        value={
+                                            address.fullName
+                                        }
+                                        onChange={
+                                            handleAddressChange
+                                        }
                                         placeholder="Full Name"
                                         className="border p-3 rounded-lg"
                                     />
 
+
                                     <input
                                         type="tel"
                                         name="phone"
-                                        value={address.phone}
-                                        onChange={handleAddressChange}
+                                        value={
+                                            address.phone
+                                        }
+                                        onChange={
+                                            handleAddressChange
+                                        }
                                         placeholder="Phone Number"
                                         className="border p-3 rounded-lg"
                                     />
 
+
                                     <input
                                         type="text"
                                         name="house"
-                                        value={address.house}
-                                        onChange={handleAddressChange}
+                                        value={
+                                            address.house
+                                        }
+                                        onChange={
+                                            handleAddressChange
+                                        }
                                         placeholder="House / Flat No."
                                         className="border p-3 rounded-lg"
                                     />
 
+
                                     <input
                                         type="text"
                                         name="street"
-                                        value={address.street}
-                                        onChange={handleAddressChange}
+                                        value={
+                                            address.street
+                                        }
+                                        onChange={
+                                            handleAddressChange
+                                        }
                                         placeholder="Street / Area"
                                         className="border p-3 rounded-lg"
                                     />
 
+
                                     <input
                                         type="text"
                                         name="city"
-                                        value={address.city}
-                                        onChange={handleAddressChange}
+                                        value={
+                                            address.city
+                                        }
+                                        onChange={
+                                            handleAddressChange
+                                        }
                                         placeholder="City"
                                         className="border p-3 rounded-lg"
                                     />
 
+
                                     <input
                                         type="text"
                                         name="pincode"
-                                        value={address.pincode}
-                                        onChange={handleAddressChange}
+                                        value={
+                                            address.pincode
+                                        }
+                                        onChange={
+                                            handleAddressChange
+                                        }
                                         placeholder="Pincode"
                                         className="border p-3 rounded-lg"
                                     />
@@ -309,7 +548,10 @@ function Checkout() {
 
                             </div>
 
-                            {/* PAYMENT METHOD */}
+
+                            {/* ========================= */}
+                            {/* PAYMENT */}
+                            {/* ========================= */}
 
                             <div className="bg-white rounded-2xl shadow-lg p-8 mt-8">
 
@@ -317,7 +559,9 @@ function Checkout() {
                                     Payment Method
                                 </h2>
 
+
                                 <div className="space-y-4">
+
 
                                     {/* COD */}
 
@@ -328,7 +572,8 @@ function Checkout() {
                                             name="payment"
                                             value="cod"
                                             checked={
-                                                paymentMethod === "cod"
+                                                paymentMethod ===
+                                                "cod"
                                             }
                                             onChange={(e) =>
                                                 setPaymentMethod(
@@ -343,6 +588,7 @@ function Checkout() {
 
                                     </label>
 
+
                                     {/* UPI */}
 
                                     <label className="flex items-center gap-3 border p-4 rounded-xl cursor-pointer">
@@ -352,7 +598,8 @@ function Checkout() {
                                             name="payment"
                                             value="upi"
                                             checked={
-                                                paymentMethod === "upi"
+                                                paymentMethod ===
+                                                "upi"
                                             }
                                             onChange={(e) =>
                                                 setPaymentMethod(
@@ -367,12 +614,16 @@ function Checkout() {
 
                                     </label>
 
-                                    {paymentMethod === "upi" && (
+
+                                    {paymentMethod ===
+                                        "upi" && (
 
                                         <input
                                             type="text"
                                             placeholder="Enter UPI ID (example@upi)"
-                                            value={upiId}
+                                            value={
+                                                upiId
+                                            }
                                             onChange={(e) =>
                                                 setUpiId(
                                                     e.target.value
@@ -383,6 +634,7 @@ function Checkout() {
 
                                     )}
 
+
                                     {/* CARD */}
 
                                     <label className="flex items-center gap-3 border p-4 rounded-xl cursor-pointer">
@@ -392,7 +644,8 @@ function Checkout() {
                                             name="payment"
                                             value="card"
                                             checked={
-                                                paymentMethod === "card"
+                                                paymentMethod ===
+                                                "card"
                                             }
                                             onChange={(e) =>
                                                 setPaymentMethod(
@@ -407,7 +660,9 @@ function Checkout() {
 
                                     </label>
 
-                                    {paymentMethod === "card" && (
+
+                                    {paymentMethod ===
+                                        "card" && (
 
                                         <div className="grid md:grid-cols-2 gap-4">
 
@@ -427,6 +682,7 @@ function Checkout() {
                                                 className="border p-3 rounded-lg md:col-span-2"
                                             />
 
+
                                             <input
                                                 type="text"
                                                 placeholder="Expiry Date (MM/YY)"
@@ -442,6 +698,7 @@ function Checkout() {
                                                 }
                                                 className="border p-3 rounded-lg"
                                             />
+
 
                                             <input
                                                 type="password"
@@ -469,7 +726,10 @@ function Checkout() {
 
                         </div>
 
+
+                        {/* ========================= */}
                         {/* ORDER SUMMARY */}
+                        {/* ========================= */}
 
                         <div className="bg-white rounded-2xl shadow-lg p-6 h-fit sticky top-24">
 
@@ -477,42 +737,80 @@ function Checkout() {
                                 Order Summary
                             </h2>
 
-                            <div className="flex justify-between mb-3">
-                                <span>Subtotal</span>
-                                <span>₹{subtotal}</span>
-                            </div>
 
                             <div className="flex justify-between mb-3">
-                                <span>Delivery Fee</span>
-                                <span>₹{deliveryFee}</span>
+
+                                <span>
+                                    Subtotal
+                                </span>
+
+                                <span>
+                                    ₹{subtotal}
+                                </span>
+
                             </div>
+
+
+                            <div className="flex justify-between mb-3">
+
+                                <span>
+                                    Delivery Fee
+                                </span>
+
+                                <span>
+                                    ₹{deliveryFee}
+                                </span>
+
+                            </div>
+
 
                             <div className="flex justify-between mb-5">
-                                <span>GST (5%)</span>
-                                <span>₹{gst}</span>
+
+                                <span>
+                                    GST (5%)
+                                </span>
+
+                                <span>
+                                    ₹{gst}
+                                </span>
+
                             </div>
+
 
                             <hr className="mb-5" />
 
+
                             <div className="flex justify-between text-2xl font-bold mb-6">
 
-                                <span>Total</span>
-                                <span>₹{total}</span>
+                                <span>
+                                    Total
+                                </span>
+
+                                <span>
+                                    ₹{total}
+                                </span>
 
                             </div>
 
+
                             <button
-                                onClick={handlePlaceOrder}
-                                disabled={placingOrder}
+                                onClick={
+                                    handlePlaceOrder
+                                }
+                                disabled={
+                                    placingOrder
+                                }
                                 className={`w-full text-white py-4 rounded-xl font-semibold transition ${
                                     placingOrder
                                         ? "bg-gray-400 cursor-not-allowed"
                                         : "bg-red-600 hover:bg-red-700"
                                 }`}
                             >
+
                                 {placingOrder
                                     ? "Placing Order..."
                                     : "Place Order"}
+
                             </button>
 
                         </div>
