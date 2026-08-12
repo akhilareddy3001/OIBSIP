@@ -39,7 +39,7 @@ function OrderDetails() {
                 setError("");
 
                 const response = await fetch(
-                    `http://localhost:5000/api/orders/${id}`
+                    `https://oibsip-e8u8.onrender.com/api/orders/${id}`
                 );
 
                 const data = await response.json();
