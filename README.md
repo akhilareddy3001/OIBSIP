@@ -2,6 +2,11 @@
 
 PizzaHub is a full-stack pizza delivery web application developed using the MERN stack. Users can browse pizzas, search and filter the menu, customize pizzas, manage their cart, authenticate using Google, place orders, and view their order history.
 
+## Live Deployment
+
+- **Frontend:** https://oibsip-k7vfhwxsq-akhi-re.vercel.app/
+- **Backend API:** https://oibsip-e8u8.onrender.com/
+
 ##  Features
 
 - Google Authentication using Firebase
