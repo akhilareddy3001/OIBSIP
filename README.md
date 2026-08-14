@@ -4,7 +4,7 @@ PizzaHub is a full-stack pizza delivery web application developed using the MERN
 
 ## Live Deployment
 
-- **Frontend:** https://oibsip-k7vfhwxsq-akhi-re.vercel.app/
+- **Frontend:** https://oibsip-4aozhx6wi-akhi-re.vercel.app/
 - **Backend API:** https://oibsip-e8u8.onrender.com/
 
 ##  Features
